@@ -1,0 +1,35 @@
+name: Publish debug APK
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-apk.yml
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK
+        run: |
+          curl -fL --retry 3 -o stage_presets_arm64_debug.apk \
+            "https://tmpfiles.org/dl/1790470071.4c18d0d76468b082/wZwVp47qEjdQ/stage_presets_arm64_debug.apk"
+          echo "90650b4939a58c9382998c26c79cee8ecbd0a7e8d79239a01f202c8069237530  stage_presets_arm64_debug.apk" | sha256sum -c -
+          unzip -t stage_presets_arm64_debug.apk >/dev/null
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create mvp-debug-apk-2 stage_presets_arm64_debug.apk \
+            --repo owen307/stage-presets-apk \
+            --target main \
+            --title "Stage Presets MVP debug APK (arm64)" \
+            --latest \
+            --notes "$(cat <<'EOF'
+One-file Android debug APK for phones (arm64). Sideload and allow install from this source. Signed with the default Android debug keystore (not Play Store).
+
+This build fixes ProPresenter playlist and slide listing. Other ProPresenter actions are unchanged.
+
+Install with adb install -r stage_presets_arm64_debug.apk, or open the file on the phone and allow install from this source.
+EOF
+)"
