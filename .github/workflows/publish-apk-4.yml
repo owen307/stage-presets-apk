@@ -1,0 +1,18 @@
+name: publish-apk-4
+on:
+  push:
+    paths:
+      - .github/workflows/publish-apk-4.yml
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download and publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -fsSL -o stage_presets_arm64_debug.apk "https://tmpfiles.org/dl/1790521348.708577da185a1942/wowMpJRaxs0e/stage_presets_arm64_debug.apk"
+          echo "4f286b8d48f10c20738e55a741efe4531040a2705bef51046ec03ec2b7ad9359  stage_presets_arm64_debug.apk" | sha256sum -c -
+          gh release create mvp-debug-apk-4 --repo owen307/stage-presets-apk --latest --title "Stage Presets arm64 debug APK 4" --notes "Arm64 debug APK for Lightkey and .spshow/.spdev. SHA-256 4f286b8d48f10c20738e55a741efe4531040a2705bef51046ec03ec2b7ad9359. Debug keystore CN=Android Debug." stage_presets_arm64_debug.apk
